@@ -11,3 +11,4 @@ default = ["crossterm"]
 [dependencies]
 crossterm = { version = "0.25", optional = true }
 tui = { version = "0.19", default-features = false, features = ['crossterm', 'serde'] }
+quick-xml = { version = "0.24.0", default-features = false }

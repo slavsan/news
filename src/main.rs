@@ -82,15 +82,15 @@ impl<T> StatefulList<T> {
         self.state.select(Some(i));
     }
 
-    fn unselect(&mut self) {
-        self.state.select(None);
-    }
+    // fn unselect(&mut self) {
+    //     self.state.select(None);
+    // }
 }
 
 struct App<'a> {
     items: StatefulList<(&'a str, usize)>,
     articles: StatefulList<(&'a str, usize)>,
-    events: Vec<(&'a str, &'a str)>,
+    // events: Vec<(&'a str, &'a str)>,
     selected: i8,
 }
 
@@ -134,38 +134,38 @@ impl<'a> App<'a> {
                 ("Article Item5", 4),
                 ("Article Item6", 1),
             ]),
-            events: vec![
-                ("Event1", "INFO"),
-                ("Event2", "INFO"),
-                ("Event3", "CRITICAL"),
-                ("Event4", "ERROR"),
-                ("Event5", "INFO"),
-                ("Event6", "INFO"),
-                ("Event7", "WARNING"),
-                ("Event8", "INFO"),
-                ("Event9", "INFO"),
-                ("Event10", "INFO"),
-                ("Event11", "CRITICAL"),
-                ("Event12", "INFO"),
-                ("Event13", "INFO"),
-                ("Event14", "INFO"),
-                ("Event15", "INFO"),
-                ("Event16", "INFO"),
-                ("Event17", "ERROR"),
-                ("Event18", "ERROR"),
-                ("Event19", "INFO"),
-                ("Event20", "INFO"),
-                ("Event21", "WARNING"),
-                ("Event22", "INFO"),
-                ("Event23", "INFO"),
-                ("Event24", "WARNING"),
-                ("Event25", "INFO"),
-                ("Event26", "INFO"),
-            ],
+            // events: vec![
+            //     ("Event1", "INFO"),
+            //     ("Event2", "INFO"),
+            //     ("Event3", "CRITICAL"),
+            //     ("Event4", "ERROR"),
+            //     ("Event5", "INFO"),
+            //     ("Event6", "INFO"),
+            //     ("Event7", "WARNING"),
+            //     ("Event8", "INFO"),
+            //     ("Event9", "INFO"),
+            //     ("Event10", "INFO"),
+            //     ("Event11", "CRITICAL"),
+            //     ("Event12", "INFO"),
+            //     ("Event13", "INFO"),
+            //     ("Event14", "INFO"),
+            //     ("Event15", "INFO"),
+            //     ("Event16", "INFO"),
+            //     ("Event17", "ERROR"),
+            //     ("Event18", "ERROR"),
+            //     ("Event19", "INFO"),
+            //     ("Event20", "INFO"),
+            //     ("Event21", "WARNING"),
+            //     ("Event22", "INFO"),
+            //     ("Event23", "INFO"),
+            //     ("Event24", "WARNING"),
+            //     ("Event25", "INFO"),
+            //     ("Event26", "INFO"),
+            // ],
         }
     }
 
-    fn nextBlock(&mut self) {
+    fn next_block(&mut self) {
         if self.selected == 2 {
             self.selected = 0;
             return
@@ -196,7 +196,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
                         app.articles.previous()
                     }
                 },
-                KeyCode::Tab => app.nextBlock(),
+                KeyCode::Tab => app.next_block(),
                 _ => {}
             }
         }
