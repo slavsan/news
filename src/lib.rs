@@ -3,7 +3,7 @@ use quick_xml::reader::Reader;
 
 #[derive(Debug)]
 #[derive(PartialEq)]
-struct Article {
+pub struct Article {
     title: String,
     url: String,
     published_at: String,
@@ -28,7 +28,7 @@ impl Article {
     }
 }
 
-fn parse_rss(example: &str) -> Result<Vec<Article>, quick_xml::Error> {
+pub fn parse_rss(example: &str) -> Result<Vec<Article>, quick_xml::Error> {
     let mut reader = Reader::from_str(example);
     let mut buf = Vec::new();
     let mut skip_buf = Vec::new();
@@ -69,7 +69,7 @@ fn parse_rss(example: &str) -> Result<Vec<Article>, quick_xml::Error> {
     Ok(articles)
 }
 
-fn parse_atom(example: &str) -> Result<Vec<Article>, quick_xml::Error> {
+pub fn parse_atom(example: &str) -> Result<Vec<Article>, quick_xml::Error> {
     let mut reader = Reader::from_str(example);
     let mut buf = Vec::new();
     let mut skip_buf = Vec::new();

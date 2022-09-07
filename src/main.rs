@@ -1,3 +1,4 @@
+use std::env;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -12,8 +13,34 @@ use tui::{
     widgets::{Block, Borders, BorderType, ListState, ListItem, List},
     Frame, Terminal,
 };
+use sqlx::sqlite::SqlitePool;
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let pool = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
+    let mut conn = pool.acquire().await?;
+
+    // Insert the task, then obtain the ID of this row
+    let id = sqlx::query!(
+        r#"
+        CREATE TABLE IF NOT EXISTS sources (
+            id INT,
+            name VARCHAR
+        );
+        "#,
+    )
+    .execute(&mut conn)
+    .await?;
+
+    let resp = reqwest::get("https://blog.cleancoder.com/atom.xml")
+        .await?;
+    let body = resp.text().await?;
+    let articles = news::parse_atom(body.clone().as_ref())?;
+
+    println!("------- PARSED --------");
+    println!("{:?}", articles);
+    println!("-----------------------");
+
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
