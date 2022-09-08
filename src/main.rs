@@ -1,5 +1,10 @@
 use std::fs;
 use std::env;
+use std::{
+    // error::Error,
+    // io,
+    time::{Duration, Instant},
+};
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -55,9 +60,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     let app = App::new(articles);
+    let tick_rate = Duration::from_millis(250);
 
     // create app and run it
-    let res = run_app(&mut terminal, app);
+    let res = run_app(&mut terminal, app, tick_rate);
 
     // restore terminal
     disable_raw_mode()?;
@@ -125,11 +131,15 @@ struct App<'a> {
     items: StatefulList<(&'a str, usize)>,
     articles: StatefulList<&'a news::Article>,
     selected: i8,
+    last_action: i8,
+    scroll: u16,
 }
 
 impl<'a> App<'a> {
     fn new(articles: Vec<&'a news::Article>) -> App<'a> {
         App {
+            scroll: 0,
+            last_action: 0,
             selected: 0,
             items: StatefulList::with_items(vec![
                 ("Item0", 1),
@@ -143,6 +153,16 @@ impl<'a> App<'a> {
         }
     }
 
+    fn on_tick(&mut self) {
+        if self.last_action == 1 {
+            self.scroll += 3;
+        } else if self.last_action == 2 {
+            if (self.scroll as i16) - 3 >= 0 {
+                self.scroll -= 3;
+            }
+        }
+    }
+
     fn next_block(&mut self) {
         match self.selected {
             2 => self.selected = 0,
@@ -151,9 +171,19 @@ impl<'a> App<'a> {
     }
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+fn run_app<B: Backend>(
+    terminal: &mut Terminal<B>,
+    mut app: App,
+    tick_rate: Duration,
+) -> io::Result<()> {
+    let mut last_tick = Instant::now();
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
+        app.last_action = 0;
+
+        let timeout = tick_rate
+            .checked_sub(last_tick.elapsed())
+            .unwrap_or_else(|| Duration::from_secs(0));
 
         if let Event::Key(key) = event::read()? {
             match key.code {
@@ -162,19 +192,40 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
                 KeyCode::Down | KeyCode::Char('j') => {
                     match app.selected {
                         0 => app.items.next(),
-                        1 => app.articles.next(),
-                        _ => {},
+                        1 => {
+                            app.scroll = 0;
+                            app.articles.next();
+                        },
+                        _ => {
+                            if app.selected == 2 {
+                                app.last_action = 1;
+                            }
+                        },
                     }
                 },
                 KeyCode::Up | KeyCode::Char('k') => {
                     match app.selected {
                         0 => app.items.previous(),
-                        1 => app.articles.previous(),
-                        _ => {},
+                        1 => {
+                            app.scroll = 0;
+                            app.articles.previous();
+                        }
+                        _ => {
+                            if app.selected == 2 {
+                                app.last_action = 2;
+                            }
+                        },
                     }
                 },
                 KeyCode::Tab => app.next_block(),
                 _ => {}
+            }
+        }
+
+        if app.selected == 2 {
+            if last_tick.elapsed() >= tick_rate {
+                app.on_tick();
+                last_tick = Instant::now();
             }
         }
     }
@@ -296,7 +347,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let create_block = |title| {
         Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().bg(Color::White).fg(Color::Black))
+            // .style(Style::default().bg(Color::White).fg(Color::Black))
             .title(Span::styled(
                 title,
                 Style::default().add_modifier(Modifier::BOLD),
@@ -306,11 +357,11 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     match app.articles.state.selected() {
         Some(i) => {
             let paragraph = Paragraph::new(app.articles.items[i].content.clone())
-                .style(Style::default().bg(Color::White).fg(Color::Black))
+                // .style(Style::default().bg(Color::White).fg(Color::Black))
                 .block(create_block("Center, wrap"))
-                .alignment(Alignment::Center)
-                .wrap(Wrap { trim: true });
-                // .scroll((app.scroll, 0));
+                // .alignment(Alignment::Center)
+                .wrap(Wrap { trim: true })
+                .scroll((app.scroll, 0));
             f.render_widget(paragraph, baz);
         }
         _ => {}
