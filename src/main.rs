@@ -1,3 +1,4 @@
+use std::fs;
 use std::env;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
@@ -40,6 +41,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("------- PARSED --------");
     // println!("{:?}", articles);
     // println!("-----------------------");
+    // let articles = articles.iter().map(|a| a).collect();
+
+    // for local testing
+    let contents = fs::read_to_string("example_atom.xml").expect("Should have been able to read the file");
+    let articles = news::parse_atom(contents.as_ref())?;
+    let articles = articles.iter().map(|a| a).collect();
 
     // setup terminal
     enable_raw_mode()?;
@@ -47,14 +54,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let article_1 = news::Article { title: "foo 1".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
-    let article_2 = news::Article { title: "foo 2".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
-    let article_3 = news::Article { title: "foo 3".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
-    let articles = vec![
-        &article_1,
-        &article_2,
-        &article_3,
-    ];
     let app = App::new(articles);
 
     // create app and run it
@@ -306,7 +305,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     match app.articles.state.selected() {
         Some(i) => {
-            let paragraph = Paragraph::new(app.articles.items[i].title.clone())
+            let paragraph = Paragraph::new(app.articles.items[i].content.clone())
                 .style(Style::default().bg(Color::White).fg(Color::Black))
                 .block(create_block("Center, wrap"))
                 .alignment(Alignment::Center)
