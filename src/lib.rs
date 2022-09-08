@@ -1,13 +1,17 @@
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
 
+use tui::{
+    text::{Span, Spans},
+};
+
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub struct Article {
-    title: String,
-    url: String,
-    published_at: String,
-    content: String,
+    pub title: String,
+    pub url: String,
+    pub published_at: String,
+    pub content: String,
 }
 
 #[derive(Debug)]
@@ -25,6 +29,18 @@ impl Article {
             published_at: "".to_string(),
             content: "".to_string(),
         }
+    }
+}
+
+impl<'a> From<&Article> for Span<'a> {
+    fn from(s: &Article) -> Span<'a> {
+        Span::raw(s.title.clone())
+    }
+}
+
+impl<'a> From<&Article> for Spans<'a> {
+    fn from(s: &Article) -> Spans<'a> {
+        Spans(vec![Span::from(s)])
     }
 }
 

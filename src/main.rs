@@ -10,36 +10,36 @@ use tui::{
     style::{Color,Style,Modifier},
     text::{Span, Spans},
     layout::{Alignment,Constraint, Direction, Layout, Rect, Corner},
-    widgets::{Block, Borders, BorderType, ListState, ListItem, List},
+    widgets::{Block, Borders, BorderType, ListState, ListItem, List, Paragraph, Wrap},
     Frame, Terminal,
 };
 use sqlx::sqlite::SqlitePool;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let pool = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
-    let mut conn = pool.acquire().await?;
-
-    // Insert the task, then obtain the ID of this row
-    let id = sqlx::query!(
-        r#"
-        CREATE TABLE IF NOT EXISTS sources (
-            id INT,
-            name VARCHAR
-        );
-        "#,
-    )
-    .execute(&mut conn)
-    .await?;
-
-    let resp = reqwest::get("https://blog.cleancoder.com/atom.xml")
-        .await?;
-    let body = resp.text().await?;
-    let articles = news::parse_atom(body.clone().as_ref())?;
-
-    println!("------- PARSED --------");
-    println!("{:?}", articles);
-    println!("-----------------------");
+    // let pool = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
+    // let mut conn = pool.acquire().await?;
+    //
+    // // Insert the task, then obtain the ID of this row
+    // let id = sqlx::query!(
+    //     r#"
+    //     CREATE TABLE IF NOT EXISTS sources (
+    //         id INT,
+    //         name VARCHAR
+    //     );
+    //     "#,
+    // )
+    // .execute(&mut conn)
+    // .await?;
+    //
+    // let resp = reqwest::get("https://blog.cleancoder.com/atom.xml")
+    //     .await?;
+    // let body = resp.text().await?;
+    // let articles = news::parse_atom(body.clone().as_ref())?;
+    //
+    // println!("------- PARSED --------");
+    // println!("{:?}", articles);
+    // println!("-----------------------");
 
     // setup terminal
     enable_raw_mode()?;
@@ -47,7 +47,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let app = App::new();
+    let article_1 = news::Article { title: "foo 1".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
+    let article_2 = news::Article { title: "foo 2".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
+    let article_3 = news::Article { title: "foo 3".to_string(), url: "http foo 1".to_string(), content: "".to_string(), published_at: "".to_string() };
+    let articles = vec![
+        &article_1,
+        &article_2,
+        &article_3,
+    ];
+    let app = App::new(articles);
 
     // create app and run it
     let res = run_app(&mut terminal, app);
@@ -116,13 +124,12 @@ impl<T> StatefulList<T> {
 
 struct App<'a> {
     items: StatefulList<(&'a str, usize)>,
-    articles: StatefulList<(&'a str, usize)>,
-    // events: Vec<(&'a str, &'a str)>,
+    articles: StatefulList<&'a news::Article>,
     selected: i8,
 }
 
 impl<'a> App<'a> {
-    fn new() -> App<'a> {
+    fn new(articles: Vec<&'a news::Article>) -> App<'a> {
         App {
             selected: 0,
             items: StatefulList::with_items(vec![
@@ -132,72 +139,16 @@ impl<'a> App<'a> {
                 ("Item3", 3),
                 ("Item4", 1),
                 ("Item5", 4),
-                ("Item6", 1),
-                ("Item7", 3),
-                ("Item8", 1),
-                ("Item9", 6),
-                ("Item10", 1),
-                ("Item11", 3),
-                ("Item12", 1),
-                ("Item13", 2),
-                ("Item14", 1),
-                ("Item15", 1),
-                ("Item16", 4),
-                ("Item17", 1),
-                ("Item18", 5),
-                ("Item19", 4),
-                ("Item20", 1),
-                ("Item21", 2),
-                ("Item22", 1),
-                ("Item23", 3),
-                ("Item24", 1),
             ]),
-            articles: StatefulList::with_items(vec![
-                ("Article Item0", 1),
-                ("Article Item1", 2),
-                ("Article Item2", 1),
-                ("Article Item3", 3),
-                ("Article Item4", 1),
-                ("Article Item5", 4),
-                ("Article Item6", 1),
-            ]),
-            // events: vec![
-            //     ("Event1", "INFO"),
-            //     ("Event2", "INFO"),
-            //     ("Event3", "CRITICAL"),
-            //     ("Event4", "ERROR"),
-            //     ("Event5", "INFO"),
-            //     ("Event6", "INFO"),
-            //     ("Event7", "WARNING"),
-            //     ("Event8", "INFO"),
-            //     ("Event9", "INFO"),
-            //     ("Event10", "INFO"),
-            //     ("Event11", "CRITICAL"),
-            //     ("Event12", "INFO"),
-            //     ("Event13", "INFO"),
-            //     ("Event14", "INFO"),
-            //     ("Event15", "INFO"),
-            //     ("Event16", "INFO"),
-            //     ("Event17", "ERROR"),
-            //     ("Event18", "ERROR"),
-            //     ("Event19", "INFO"),
-            //     ("Event20", "INFO"),
-            //     ("Event21", "WARNING"),
-            //     ("Event22", "INFO"),
-            //     ("Event23", "INFO"),
-            //     ("Event24", "WARNING"),
-            //     ("Event25", "INFO"),
-            //     ("Event26", "INFO"),
-            // ],
+            articles: StatefulList::with_items(articles),
         }
     }
 
     fn next_block(&mut self) {
-        if self.selected == 2 {
-            self.selected = 0;
-            return
+        match self.selected {
+            2 => self.selected = 0,
+            _ => self.selected += 1,
         }
-        self.selected += 1;
     }
 }
 
@@ -210,17 +161,17 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
                 KeyCode::Char('q') => return Ok(()),
                 // KeyCode::Left => app.items.unselect(),
                 KeyCode::Down | KeyCode::Char('j') => {
-                    if app.selected == 0 {
-                        app.items.next()
-                    } else if app.selected == 1 {
-                        app.articles.next()
+                    match app.selected {
+                        0 => app.items.next(),
+                        1 => app.articles.next(),
+                        _ => {},
                     }
                 },
                 KeyCode::Up | KeyCode::Char('k') => {
-                    if app.selected == 0 {
-                        app.items.previous()
-                    } else if app.selected == 1 {
-                        app.articles.previous()
+                    match app.selected {
+                        0 => app.items.previous(),
+                        1 => app.articles.previous(),
+                        _ => {},
                     }
                 },
                 KeyCode::Tab => app.next_block(),
@@ -237,12 +188,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let size = f.size();
 
     let chunks = Layout::default()
-    .direction(Direction::Horizontal)
-    .constraints([
-        Constraint::Percentage(30),
-        Constraint::Percentage(70),
-    ].as_ref())
-    .split(f.size());
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage(30),
+            Constraint::Percentage(70),
+        ].as_ref())
+        .split(f.size());
 
     let foo = chunks[0];
 
@@ -260,12 +211,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     f.render_widget(sources_block, chunks[0]);
 
     let chunks = Layout::default()
-    .direction(Direction::Vertical)
-    .constraints([
-        Constraint::Percentage(50),
-        Constraint::Percentage(50),
-    ].as_ref())
-    .split(chunks[1]);
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(50),
+            Constraint::Percentage(50),
+        ].as_ref())
+        .split(chunks[1]);
 
     let block = Block::default()
         .borders(Borders::ALL)
@@ -291,6 +242,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         block
     };
     f.render_widget(block, chunks[1]);
+    let baz = chunks[1];
 
     // Iterate through all elements in the `items` app and append some debug text to it.
     let items: Vec<ListItem> = app
@@ -323,7 +275,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .items
         .iter()
         .map(|i| {
-            let mut lines = vec![Spans::from(i.0)];
+            let mut lines = vec![Spans::from(*i)];
             ListItem::new(lines)
         })
         .collect();
@@ -341,4 +293,27 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     // We can now render the item list
     f.render_stateful_widget(articles, bar, &mut app.articles.state);
+
+    let create_block = |title| {
+        Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().bg(Color::White).fg(Color::Black))
+            .title(Span::styled(
+                title,
+                Style::default().add_modifier(Modifier::BOLD),
+            ))
+    };
+
+    match app.articles.state.selected() {
+        Some(i) => {
+            let paragraph = Paragraph::new(app.articles.items[i].title.clone())
+                .style(Style::default().bg(Color::White).fg(Color::Black))
+                .block(create_block("Center, wrap"))
+                .alignment(Alignment::Center)
+                .wrap(Wrap { trim: true });
+                // .scroll((app.scroll, 0));
+            f.render_widget(paragraph, baz);
+        }
+        _ => {}
+    }
 }
