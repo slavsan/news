@@ -16,7 +16,7 @@ use tui::{
     style::{Color,Style,Modifier},
     text::{Span, Spans},
     layout::{Alignment,Constraint, Direction, Layout, Rect, Corner},
-    widgets::{Block, Borders, BorderType, ListState, ListItem, List, Paragraph, Wrap},
+    widgets::{Block, Borders, BorderType, Clear, ListState, ListItem, List, Paragraph, Wrap},
     Frame, Terminal,
 };
 use sqlx::sqlite::SqlitePool;
@@ -133,6 +133,7 @@ struct App<'a> {
     selected: i8,
     last_action: i8,
     scroll: u16,
+    show_popup: bool,
 }
 
 impl<'a> App<'a> {
@@ -141,6 +142,7 @@ impl<'a> App<'a> {
             scroll: 0,
             last_action: 0,
             selected: 0,
+            show_popup: false,
             items: StatefulList::with_items(vec![
                 ("Item0", 1),
                 ("Item1", 2),
@@ -189,6 +191,7 @@ fn run_app<B: Backend>(
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 // KeyCode::Left => app.items.unselect(),
+                KeyCode::Char('p') => app.show_popup = !app.show_popup,
                 KeyCode::Down | KeyCode::Char('j') => {
                     match app.selected {
                         0 => app.items.next(),
@@ -398,4 +401,38 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         }
         _ => {}
     }
+
+    if app.show_popup {
+        let block = Block::default().title("Popup").borders(Borders::ALL);
+        let area = centered_rect(60, 20, size);
+        f.render_widget(Clear, area); //this clears out the background
+        f.render_widget(block, area);
+    }
+}
+
+/// helper function to create a centered rect using up certain percentage of the available rect `r`
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_y) / 2),
+                Constraint::Percentage(percent_y),
+                Constraint::Percentage((100 - percent_y) / 2),
+            ]
+            .as_ref(),
+        )
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(
+            [
+                Constraint::Percentage((100 - percent_x) / 2),
+                Constraint::Percentage(percent_x),
+                Constraint::Percentage((100 - percent_x) / 2),
+            ]
+            .as_ref(),
+        )
+        .split(popup_layout[1])[1]
 }
