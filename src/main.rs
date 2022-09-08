@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     let app = App::new(articles);
-    let tick_rate = Duration::from_millis(250);
+    let tick_rate = Duration::from_millis(50);
 
     // create app and run it
     let res = run_app(&mut terminal, app, tick_rate);
@@ -305,15 +305,21 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         })
         .collect();
 
+    let style = if app.selected == 0 {
+        Style::default()
+            .fg(Color::Black)
+            .bg(Color::LightGreen)
+            .add_modifier(Modifier::BOLD)
+    } else {
+        Style::default()
+            .bg(Color::DarkGray)
+            .fg(Color::White)
+            .add_modifier(Modifier::BOLD)
+    };
     // Create a List from all list items and highlight the currently selected one
     let items = List::new(items)
         .block(Block::default().borders(Borders::ALL).title("Sources"))
-        .highlight_style(
-            Style::default()
-                .bg(Color::LightGreen)
-                .fg(Color::Black)
-                .add_modifier(Modifier::BOLD),
-        )
+        .highlight_style(style)
         .highlight_symbol("");
 
     // We can now render the item list
@@ -330,15 +336,21 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         })
         .collect();
 
+    let style = if app.selected == 1 {
+        Style::default()
+            .fg(Color::Black)
+            .bg(Color::LightGreen)
+            .add_modifier(Modifier::BOLD)
+    } else {
+        Style::default()
+            .bg(Color::DarkGray)
+            .fg(Color::White)
+            .add_modifier(Modifier::BOLD)
+    };
     // Create a List from all list items and highlight the currently selected one
     let articles = List::new(articles)
         .block(Block::default().borders(Borders::ALL).title("Articles"))
-        .highlight_style(
-            Style::default()
-                .bg(Color::LightGreen)
-                .fg(Color::Black)
-                .add_modifier(Modifier::BOLD),
-        )
+        .highlight_style(style)
         .highlight_symbol("");
 
     // We can now render the item list
