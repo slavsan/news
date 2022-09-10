@@ -7,6 +7,7 @@ use tui::{
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Article {
     pub title: String,
     pub url: String,
@@ -19,6 +20,32 @@ pub struct Article {
 struct Attribute {
     key: String,
     value: String,
+}
+
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub struct Source {
+    pub name: String,
+}
+
+impl Source {
+    pub fn new() -> Self {
+        Source {
+            name: "".to_string(),
+        }
+    }
+}
+
+impl<'a> From<&Source> for Span<'a> {
+    fn from(s: &Source) -> Span<'a> {
+        Span::raw(s.name.clone())
+    }
+}
+
+impl<'a> From<&Source> for Spans<'a> {
+    fn from(s: &Source) -> Spans<'a> {
+        Spans(vec![Span::from(s)])
+    }
 }
 
 impl Article {

@@ -48,10 +48,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("-----------------------");
     // let articles = articles.iter().map(|a| a).collect();
 
-    // for local testing
-    let contents = fs::read_to_string("example_atom.xml").expect("Should have been able to read the file");
-    let articles = news::parse_atom(contents.as_ref())?;
-    let articles = articles.iter().map(|a| a).collect();
+    let source_1 = &news::Source{ name: "foo 1".to_string() };
+    let source_2 = &news::Source{ name: "foo 2".to_string() };
+    let source_3 = &news::Source{ name: "foo 3".to_string() };
+    let sources = vec![
+        source_1,
+        source_2,
+        source_3,
+    ];
 
     // setup terminal
     enable_raw_mode()?;
@@ -59,7 +63,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let app = App::new(articles);
+    let mut state = AppState::new();
+    let app = App::new(&mut state, sources);
     let tick_rate = Duration::from_millis(50);
 
     // create app and run it
@@ -127,9 +132,30 @@ impl<T> StatefulList<T> {
     // }
 }
 
+struct AppState<'a> {
+    articles: Vec<news::Article>,
+    _phantom_data: std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a> AppState<'a> {
+    fn new() -> AppState<'a> {
+        let contents = fs::read_to_string("example_rss.xml").expect("Should have been able to read the file");
+        let articles = news::parse_rss(contents.as_ref()).unwrap_or_default();
+        AppState {
+            articles: articles,
+            _phantom_data: std::marker::PhantomData,
+        }
+    }
+
+    fn set_articles(&mut self, articles: Vec<news::Article>) {
+        self.articles = articles;
+    }
+}
+
 struct App<'a> {
-    items: StatefulList<(&'a str, usize)>,
-    articles: StatefulList<&'a news::Article>,
+    state: &'a mut AppState<'a>,
+    sources: StatefulList<&'a news::Source>,
+    articles: StatefulList<news::Article>,
     selected: i8,
     last_action: i8,
     scroll: u16,
@@ -137,22 +163,30 @@ struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    fn new(articles: Vec<&'a news::Article>) -> App<'a> {
+    fn new(
+        state: &'a mut AppState<'a>,
+        sources: Vec<&'a news::Source>,
+    ) -> App<'a> {
+        let mut articles: Vec<news::Article> = Vec::new();
+        for article in state.articles.iter() {
+            articles.push(article.clone());
+        }
         App {
+            state: state,
             scroll: 0,
             last_action: 0,
             selected: 0,
             show_popup: false,
-            items: StatefulList::with_items(vec![
-                ("Item0", 1),
-                ("Item1", 2),
-                ("Item2", 1),
-                ("Item3", 3),
-                ("Item4", 1),
-                ("Item5", 4),
-            ]),
+            sources: StatefulList::with_items(sources),
             articles: StatefulList::with_items(articles),
         }
+    }
+
+    fn update_articles(&mut self) {
+        let contents = fs::read_to_string("example_atom.xml").expect("Should have been able to read the file");
+        let articles = news::parse_atom(contents.as_ref()).unwrap_or_default();
+        self.state.set_articles(articles);
+        self.articles = StatefulList::with_items(self.state.articles.clone());
     }
 
     fn on_tick(&mut self) {
@@ -190,11 +224,14 @@ fn run_app<B: Backend>(
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
+                KeyCode::Char('s') => {
+                    app.update_articles();
+                },
                 // KeyCode::Left => app.items.unselect(),
                 KeyCode::Char('p') => app.show_popup = !app.show_popup,
                 KeyCode::Down | KeyCode::Char('j') => {
                     match app.selected {
-                        0 => app.items.next(),
+                        0 => app.sources.next(),
                         1 => {
                             app.scroll = 0;
                             app.articles.next();
@@ -208,7 +245,7 @@ fn run_app<B: Backend>(
                 },
                 KeyCode::Up | KeyCode::Char('k') => {
                     match app.selected {
-                        0 => app.items.previous(),
+                        0 => app.sources.previous(),
                         1 => {
                             app.scroll = 0;
                             app.articles.previous();
@@ -318,12 +355,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let baz = chunks[1];
 
     // Iterate through all elements in the `items` app and append some debug text to it.
-    let items: Vec<ListItem> = app
-        .items
+    let sources: Vec<ListItem> = app
+        .sources
         .items
         .iter()
         .map(|i| {
-            let mut lines = vec![Spans::from(i.0)];
+            let mut lines = vec![Spans::from(*i)];
             ListItem::new(lines) //.style(Style::default().fg(Color::Black).bg(Color::White))
         })
         .collect();
@@ -340,13 +377,13 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             .add_modifier(Modifier::BOLD)
     };
     // Create a List from all list items and highlight the currently selected one
-    let items = List::new(items)
+    let sources = List::new(sources)
         .block(Block::default().borders(Borders::ALL).title("Sources"))
         .highlight_style(style)
         .highlight_symbol("");
 
     // We can now render the item list
-    f.render_stateful_widget(items, foo, &mut app.items.state);
+    f.render_stateful_widget(sources, foo, &mut app.sources.state);
 
     // Iterate through all elements in the `items` app and append some debug text to it.
     let articles: Vec<ListItem> = app
@@ -354,7 +391,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .items
         .iter()
         .map(|i| {
-            let mut lines = vec![Spans::from(*i)];
+            let mut lines = vec![Spans::from(i)];
             ListItem::new(lines)
         })
         .collect();

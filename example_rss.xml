@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>InfoQ</title>
+    <link>https://www.infoq.com</link>
+    <description>InfoQ feed</description>
+    <item>
+      <title>Podcast: Shifting from Passenger to Driver Mindset</title>
+      <link>https://www.infoq.com/podcasts/passenger-shifting-driver-mindset/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/podcasts/passenger-shifting-driver-mindset/en/smallimage/engineering-culture-podcast-logo-1662711123662.jpeg"/&gt;&lt;p&gt;Shane Hastie spoke to Mingxi Wu, VP of Engineering for TigerGraph about their engineering culture, motivating engineers through empowerment and shifting from a passenger to a driver mindset.&lt;/p&gt; &lt;i&gt;By Mingxi Wu&lt;/i&gt;</description>
+      <category>Engagement Agility</category>
+      <category>Engineering Culture Podcast</category>
+      <category>Startup</category>
+      <category>Motivation</category>
+      <category>Teamwork</category>
+      <category>learning</category>
+      <category>Culture &amp; Methods</category>
+      <category>podcast</category>
+      <pubDate>Fri, 09 Sep 2022 17:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/podcasts/passenger-shifting-driver-mindset/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Mingxi Wu</dc:creator>
+      <dc:date>2022-09-09T17:00:00Z</dc:date>
+      <dc:identifier>/podcasts/passenger-shifting-driver-mindset/en</dc:identifier>
+    </item>
+    <item>
+      <title>JEP 429: Extent-Local Variables to Promote Immutability in Java</title>
+      <link>https://www.infoq.com/news/2022/09/extent-local-variables-java/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/extent-local-variables-java/en/headerimage/java-istock-image-01-1662655973937.jpg"/&gt;&lt;p&gt;JEP 429, Extent-Local Variables (Incubator), was promoted from its JEP Draft 8263012 to Candidate status. This incubating JEP, under the umbrella of Project Loom, proposes enabling the sharing of immutable data within and across threads. This is preferred to thread-local variables, especially when using large numbers of virtual threads.&lt;/p&gt; &lt;i&gt;By A N M Bazlur Rahman&lt;/i&gt;</description>
+      <category>Project Loom</category>
+      <category>Multi-threading</category>
+      <category>Java</category>
+      <category>Concurrency</category>
+      <category>ThreadLocal</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>news</category>
+      <pubDate>Fri, 09 Sep 2022 12:30:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/extent-local-variables-java/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>A N M Bazlur Rahman</dc:creator>
+      <dc:date>2022-09-09T12:30:00Z</dc:date>
+      <dc:identifier>/news/2022/09/extent-local-variables-java/en</dc:identifier>
+    </item>
+    <item>
+      <title>JDK 19 and JDK 20: What We Know So Far</title>
+      <link>https://www.infoq.com/news/2022/09/java-19-so-far/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/java-19-so-far/en/headerimage/java-istock-image-01-1662717128981.jpg"/&gt;&lt;p&gt;JDK 19, the second non-LTS release since JDK 17, has reached its initial release candidate phase with a final set of seven (7) new features, in the form of JEPs, that can be separated into three categories: Core Java Library, Java Specification and Hotspot Compiler. We examine JDK 19 and predict what features may be targeted for JDK 20.&lt;/p&gt; &lt;i&gt;By Michael Redlich&lt;/i&gt;</description>
+      <category>Virtual Thread</category>
+      <category>Structured Concurrency</category>
+      <category>Value Types</category>
+      <category>JDK 19</category>
+      <category>Java</category>
+      <category>JDK 20</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>DevOps</category>
+      <category>news</category>
+      <pubDate>Fri, 09 Sep 2022 11:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/java-19-so-far/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Michael Redlich</dc:creator>
+      <dc:date>2022-09-09T11:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/java-19-so-far/en</dc:identifier>
+    </item>
+    <item>
+      <title>Near-Optimal Scaling of Large Deep Network Training on Public Cloud</title>
+      <link>https://www.infoq.com/news/2022/09/optimal-scaling-dnn/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/optimal-scaling-dnn/en/headerimage/generatedHeaderImage-1662555703935.jpg"/&gt;&lt;p&gt;A recently published study, MiCS, provides experimental evidence that the infrastructure used to carry out model training should be taken into account, especially for large deep neural networks trained on the public cloud. The article shows distributing the model weights unevenly between GPUs decreases inter-node communication overhead on AWS V100 and A100 instances.&lt;/p&gt; &lt;i&gt;By Sabri Bolkar&lt;/i&gt;</description>
+      <category>Cloud Computing</category>
+      <category>Deep Learning</category>
+      <category>AWS</category>
+      <category>AI, ML &amp; Data Engineering</category>
+      <category>news</category>
+      <pubDate>Fri, 09 Sep 2022 09:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/optimal-scaling-dnn/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Sabri Bolkar</dc:creator>
+      <dc:date>2022-09-09T09:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/optimal-scaling-dnn/en</dc:identifier>
+    </item>
+    <item>
+      <title>Article: Running a Hackathon That Sparks Developer Innovation</title>
+      <link>https://www.infoq.com/articles/hackathon-developer-innovation/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/articles/hackathon-developer-innovation/en/headerimage/generatedHeaderImage-1662578814159.jpg"/&gt;&lt;p&gt;Hackathons are much more than a fun day of problem-solving and team bonding. They give developers a closer connection to customer problems and, as a result, can drive real, tangible business and even social impact. Here are best practices for hosting your own hackathon.&lt;/p&gt; &lt;i&gt;By Tilde Thurium&lt;/i&gt;</description>
+      <category>Creativity</category>
+      <category>Hackathons</category>
+      <category>Innovation</category>
+      <category>Culture &amp; Methods</category>
+      <category>article</category>
+      <pubDate>Fri, 09 Sep 2022 07:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/articles/hackathon-developer-innovation/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Tilde Thurium</dc:creator>
+      <dc:date>2022-09-09T07:00:00Z</dc:date>
+      <dc:identifier>/articles/hackathon-developer-innovation/en</dc:identifier>
+    </item>
+    <item>
+      <title>How to Test Low Code Applications</title>
+      <link>https://www.infoq.com/news/2022/09/test-low-code-applications/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/test-low-code-applications/en/headerimage/generatedHeaderImage-1662617011300.jpg"/&gt;&lt;p&gt;For low code applications there are technical things you don’t have to test, like the integration with the database and the syntax of a screen. But you still have to test functionally, to check if you’re building the right thing. End-to-end testing and non-functional testing can be very important for low code applications.&lt;/p&gt; &lt;i&gt;By Ben Linders&lt;/i&gt;</description>
+      <category>Risk</category>
+      <category>Low Code</category>
+      <category>Agile Test</category>
+      <category>Risk Management</category>
+      <category>Software Testing</category>
+      <category>Integration Test</category>
+      <category>Artifacts &amp; Tools</category>
+      <category>Testing</category>
+      <category>Agile Conferences</category>
+      <category>Culture &amp; Methods</category>
+      <category>Development</category>
+      <category>news</category>
+      <pubDate>Thu, 08 Sep 2022 11:45:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/test-low-code-applications/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Ben Linders</dc:creator>
+      <dc:date>2022-09-08T11:45:00Z</dc:date>
+      <dc:identifier>/news/2022/09/test-low-code-applications/en</dc:identifier>
+    </item>
+    <item>
+      <title>Azure Managed Grafana Now Generally Available</title>
+      <link>https://www.infoq.com/news/2022/09/azure-managed-grafana-ga/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/azure-managed-grafana-ga/en/headerimage/generatedHeaderImage-1662232575694.jpg"/&gt;&lt;p&gt;Microsoft recently announced the general availability (GA) of Azure Managed Grafana, a managed service that enables customers to run Grafana natively within the Azure cloud platform. With the managed service, they can connect to existing Azure Services to enhance observability and cloud management.&lt;/p&gt; &lt;i&gt;By Steef-Jan Wiggers&lt;/i&gt;</description>
+      <category>application performance management</category>
+      <category>Cloud</category>
+      <category>Observability</category>
+      <category>Microsoft Azure</category>
+      <category>Azure</category>
+      <category>Data Visualization</category>
+      <category>Grafana</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>DevOps</category>
+      <category>news</category>
+      <pubDate>Thu, 08 Sep 2022 10:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/azure-managed-grafana-ga/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Steef-Jan Wiggers</dc:creator>
+      <dc:date>2022-09-08T10:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/azure-managed-grafana-ga/en</dc:identifier>
+    </item>
+    <item>
+      <title>Presentation: Simplify and Accelerate Kubernetes Adoption</title>
+      <link>https://www.infoq.com/presentations/deploy-kubernetes-adoption/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/presentations/deploy-kubernetes-adoption/en/mediumimage/infoq-live-m-1662538375063.jpg"/&gt;&lt;p&gt;The panelists explain how to avoid underperforming deployments and prevent excessive cost, providing concrete advice on how to overcome game-stopping barriers such as Kubernetes skill gaps.&lt;/p&gt; &lt;i&gt;By Lukonde Mwila, Rosemary Wang, Alexander Matyushentsev, Eric Goode, Renato Losio&lt;/i&gt;</description>
+      <category>InfoQ Live August 2022</category>
+      <category>Transcripts</category>
+      <category>Kubernetes</category>
+      <category>Deployment</category>
+      <category>DevOps</category>
+      <category>presentation</category>
+      <pubDate>Thu, 08 Sep 2022 09:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/presentations/deploy-kubernetes-adoption/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Lukonde Mwila, Rosemary Wang, Alexander Matyushentsev, Eric Goode, Renato Losio</dc:creator>
+      <dc:date>2022-09-08T09:00:00Z</dc:date>
+      <dc:identifier>/presentations/deploy-kubernetes-adoption/en</dc:identifier>
+    </item>
+    <item>
+      <title>Baidu Announces Superconducting Quantum Computer and Integration Solution</title>
+      <link>https://www.infoq.com/news/2022/09/Baidu-quantum-computing-platform/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/Baidu-quantum-computing-platform/en/headerimage/baidu-quantum-processor-1662580450082.jpeg"/&gt;&lt;p&gt;Baidu, the company behind the homonymous search engine, has announced its first quantum computing processor, named Qian Shi, along with an "all-platform" integration solution aimed to simplify access to quantum hardware resources via mobile, desktop, and the Cloud.&lt;/p&gt; &lt;i&gt;By Sergio De Simone&lt;/i&gt;</description>
+      <category>Quantum Computing</category>
+      <category>Baidu</category>
+      <category>Development</category>
+      <category>news</category>
+      <pubDate>Wed, 07 Sep 2022 21:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/Baidu-quantum-computing-platform/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Sergio De Simone</dc:creator>
+      <dc:date>2022-09-07T21:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/Baidu-quantum-computing-platform/en</dc:identifier>
+    </item>
+    <item>
+      <title>Article: How to Migrate an Oracle Database to MySQL Using AWS Database Migration Service</title>
+      <link>https://www.infoq.com/articles/oracle-to-mysql-aws-database-migration-service/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/articles/oracle-to-mysql-aws-database-migration-service/en/headerimage/generatedHeaderImage-1662492103322.jpg"/&gt;&lt;p&gt;Data migration efforts are typically taken up for database consolidation, cost considerations, or migrating on-prem databases to a cloud platform. In this article, author Deepak Vohra discusses the details of migrating a local database to MySQL database on the cloud, using AWS Database Migration Service.&lt;/p&gt; &lt;i&gt;By Deepak Vohra&lt;/i&gt;</description>
+      <category>Oracle</category>
+      <category>Data Management</category>
+      <category>MySQL</category>
+      <category>Database Management</category>
+      <category>AWS</category>
+      <category>Development</category>
+      <category>AI, ML &amp; Data Engineering</category>
+      <category>article</category>
+      <pubDate>Wed, 07 Sep 2022 07:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/articles/oracle-to-mysql-aws-database-migration-service/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Deepak Vohra</dc:creator>
+      <dc:date>2022-09-07T07:00:00Z</dc:date>
+      <dc:identifier>/articles/oracle-to-mysql-aws-database-migration-service/en</dc:identifier>
+    </item>
+    <item>
+      <title>Azure Data Explorer Supports Native Ingestion from Amazon S3</title>
+      <link>https://www.infoq.com/news/2022/09/azure-adx-s3/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/azure-adx-s3/en/headerimage/generatedHeaderImage-1661846939178.jpg"/&gt;&lt;p&gt;Microsoft recently announced the ability to natively ingest data from Amazon S3 into Azure Data Explorer (ADX). The new feature simplifies multi-cloud data analytics deployments, bringing data from Amazon S3 to Azure, without relying on custom ETL pipelines.&lt;/p&gt; &lt;i&gt;By Renato Losio&lt;/i&gt;</description>
+      <category>Cloud</category>
+      <category>Big Data</category>
+      <category>S3</category>
+      <category>Azure</category>
+      <category>AWS</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>news</category>
+      <pubDate>Wed, 07 Sep 2022 06:07:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/azure-adx-s3/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Renato Losio</dc:creator>
+      <dc:date>2022-09-07T06:07:00Z</dc:date>
+      <dc:identifier>/news/2022/09/azure-adx-s3/en</dc:identifier>
+    </item>
+    <item>
+      <title>Stability AI Open-Sources Image Generation Model Stable Diffusion</title>
+      <link>https://www.infoq.com/news/2022/09/stable-diffusion-image-gen/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/stable-diffusion-image-gen/en/headerimage/generatedHeaderImage-1662216381401.jpg"/&gt;&lt;p&gt;Stability AI released the pre-trained model weights for Stable Diffusion, a text-to-image AI model, to the general public. Given a text prompt, Stable Diffusion can generate photorealistic 512x512 pixel images depicting the scene described in the prompt.&lt;/p&gt; &lt;i&gt;By Anthony Alford&lt;/i&gt;</description>
+      <category>Computer Vision</category>
+      <category>Deep Learning</category>
+      <category>Neural Networks</category>
+      <category>AI, ML &amp; Data Engineering</category>
+      <category>news</category>
+      <pubDate>Tue, 06 Sep 2022 13:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/stable-diffusion-image-gen/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Anthony Alford</dc:creator>
+      <dc:date>2022-09-06T13:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/stable-diffusion-image-gen/en</dc:identifier>
+    </item>
+    <item>
+      <title>Google Introduces Pay-as-You-Go Pricing for Apigee API Management</title>
+      <link>https://www.infoq.com/news/2022/09/apigee-pay-as-you-go-pricing/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/apigee-pay-as-you-go-pricing/en/headerimage/generatedHeaderImage-1662032327424.jpg"/&gt;&lt;p&gt;Recently Google introduced a pay-as-you-go pricing model for Apigee’s API management to provide customers with more flexibility in using the service and control costs.&lt;/p&gt; &lt;i&gt;By Steef-Jan Wiggers&lt;/i&gt;</description>
+      <category>Cloud</category>
+      <category>Cost Savings</category>
+      <category>Google Cloud</category>
+      <category>API</category>
+      <category>Google</category>
+      <category>API Gateway</category>
+      <category>Cost Optimization</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>DevOps</category>
+      <category>news</category>
+      <pubDate>Tue, 06 Sep 2022 10:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/apigee-pay-as-you-go-pricing/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Steef-Jan Wiggers</dc:creator>
+      <dc:date>2022-09-06T10:00:00Z</dc:date>
+      <dc:identifier>/news/2022/09/apigee-pay-as-you-go-pricing/en</dc:identifier>
+    </item>
+    <item>
+      <title>Article: Choosing the Right Cloud Infrastructure for Your SaaS Start-up</title>
+      <link>https://www.infoq.com/articles/cloud-infrastructure-saas/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/articles/cloud-infrastructure-saas/en/headerimage/choosing-right-cloud-infrastructure-for-your-SaaS-start-up-header-logo-1662114581062.jpg"/&gt;&lt;p&gt;As a solution architect, I have been designing SaaS applications for years and I have seen start-ups struggle to find the right cloud infrastructure and improve their product offering. These experiences prompted me to write this article as a tool to help companies make a pragmatic fact and data-driven decision.&lt;/p&gt; &lt;i&gt;By Ratnesh Singh Parihar&lt;/i&gt;</description>
+      <category>FaaS</category>
+      <category>Cloud</category>
+      <category>Low Code</category>
+      <category>IaaS</category>
+      <category>Cloud Computing</category>
+      <category>SaaS</category>
+      <category>Infrastructure</category>
+      <category>PaaS</category>
+      <category>Kubernetes</category>
+      <category>Architecture &amp; Design</category>
+      <category>Development</category>
+      <category>DevOps</category>
+      <category>article</category>
+      <pubDate>Tue, 06 Sep 2022 09:00:00 GMT</pubDate>
+      <guid>https://www.infoq.com/articles/cloud-infrastructure-saas/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Ratnesh Singh Parihar</dc:creator>
+      <dc:date>2022-09-06T09:00:00Z</dc:date>
+      <dc:identifier>/articles/cloud-infrastructure-saas/en</dc:identifier>
+    </item>
+    <item>
+      <title>Amazon Announces the Improvement of ML Models to Better Identify Sensitive Data on Amazon Macie</title>
+      <link>https://www.infoq.com/news/2022/09/aws-amazon-macie-security-data/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</link>
+      <description>&lt;img src="https://res.infoq.com/news/2022/09/aws-amazon-macie-security-data/en/headerimage/generatedHeaderImage-1662046653293.jpg"/&gt;&lt;p&gt;Amazon is announcing a new capability to create allow lists in Amazon Macie. Now text or text patterns not desire for Macie to report as sensitive data can be specified in allow lists. Amazon Macie is a fully managed data security and data privacy service that uses machine learning and pattern matching to discover and protect sensitive data in AWS.&lt;/p&gt; &lt;i&gt;By Daniel Dominguez&lt;/i&gt;</description>
+      <category>Data</category>
+      <category>Machine Learning</category>
+      <category>Security</category>
+      <category>AI, ML &amp; Data Engineering</category>
+      <category>news</category>
+      <pubDate>Tue, 06 Sep 2022 08:34:00 GMT</pubDate>
+      <guid>https://www.infoq.com/news/2022/09/aws-amazon-macie-security-data/?utm_campaign=infoq_content&amp;utm_source=infoq&amp;utm_medium=feed&amp;utm_term=global</guid>
+      <dc:creator>Daniel Dominguez</dc:creator>
+      <dc:date>2022-09-06T08:34:00Z</dc:date>
+      <dc:identifier>/news/2022/09/aws-amazon-macie-security-data/en</dc:identifier>
+    </item>
+  </channel>
+</rss>
