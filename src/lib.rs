@@ -24,6 +24,7 @@ struct Attribute {
 
 #[derive(Debug)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub struct Source {
     pub name: String,
 }

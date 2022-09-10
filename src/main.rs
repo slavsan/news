@@ -48,15 +48,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("-----------------------");
     // let articles = articles.iter().map(|a| a).collect();
 
-    let source_1 = &news::Source{ name: "foo 1".to_string() };
-    let source_2 = &news::Source{ name: "foo 2".to_string() };
-    let source_3 = &news::Source{ name: "foo 3".to_string() };
-    let sources = vec![
-        source_1,
-        source_2,
-        source_3,
-    ];
-
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -64,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     let mut state = AppState::new();
-    let app = App::new(&mut state, sources);
+    let app = App::new(&mut state);
     let tick_rate = Duration::from_millis(50);
 
     // create app and run it
@@ -133,16 +124,22 @@ impl<T> StatefulList<T> {
 }
 
 struct AppState<'a> {
+    sources: Vec<news::Source>,
     articles: Vec<news::Article>,
-    _phantom_data: std::marker::PhantomData<&'a ()>,
+    _phantom_data: std::marker::PhantomData<&'a ()>, // TODO: remove this
 }
 
 impl<'a> AppState<'a> {
     fn new() -> AppState<'a> {
+        let source_1 = news::Source{ name: "foo 1".to_string() };
+        let source_2 = news::Source{ name: "foo 2".to_string() };
+        let source_3 = news::Source{ name: "foo 3".to_string() };
+        let sources = vec![source_1, source_2, source_3];
         let contents = fs::read_to_string("example_rss.xml").expect("Should have been able to read the file");
         let articles = news::parse_rss(contents.as_ref()).unwrap_or_default();
         AppState {
-            articles: articles,
+            sources,
+            articles,
             _phantom_data: std::marker::PhantomData,
         }
     }
@@ -150,11 +147,15 @@ impl<'a> AppState<'a> {
     fn set_articles(&mut self, articles: Vec<news::Article>) {
         self.articles = articles;
     }
+
+    fn set_sources(&mut self, sources: Vec<news::Source>) {
+        self.sources = sources;
+    }
 }
 
 struct App<'a> {
     state: &'a mut AppState<'a>,
-    sources: StatefulList<&'a news::Source>,
+    sources: StatefulList<news::Source>,
     articles: StatefulList<news::Article>,
     selected: i8,
     last_action: i8,
@@ -163,13 +164,14 @@ struct App<'a> {
 }
 
 impl<'a> App<'a> {
-    fn new(
-        state: &'a mut AppState<'a>,
-        sources: Vec<&'a news::Source>,
-    ) -> App<'a> {
+    fn new(state: &'a mut AppState<'a>) -> App<'a> {
         let mut articles: Vec<news::Article> = Vec::new();
         for article in state.articles.iter() {
             articles.push(article.clone());
+        }
+        let mut sources: Vec<news::Source> = Vec::new();
+        for source in state.sources.iter() {
+            sources.push(source.clone());
         }
         App {
             state: state,
@@ -187,6 +189,17 @@ impl<'a> App<'a> {
         let articles = news::parse_atom(contents.as_ref()).unwrap_or_default();
         self.state.set_articles(articles);
         self.articles = StatefulList::with_items(self.state.articles.clone());
+    }
+
+    fn update_sources(&mut self) {
+        let source_1 = news::Source{ name: "foo 1".to_string() };
+        let source_2 = news::Source{ name: "foo 2".to_string() };
+        let source_3 = news::Source{ name: "foo 3".to_string() };
+        let source_4 = news::Source{ name: "foo 4".to_string() };
+        let sources = vec![source_1, source_2, source_3, source_4];
+        self.state.set_sources(sources);
+        self.sources = StatefulList::with_items(self.state.sources.clone());
+        // self.sources.state.select(Some(1));
     }
 
     fn on_tick(&mut self) {
@@ -224,8 +237,11 @@ fn run_app<B: Backend>(
         if let Event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
-                KeyCode::Char('s') => {
+                KeyCode::Char('a') => {
                     app.update_articles();
+                },
+                KeyCode::Char('s') => {
+                    app.update_sources();
                 },
                 // KeyCode::Left => app.items.unselect(),
                 KeyCode::Char('p') => app.show_popup = !app.show_popup,
@@ -360,7 +376,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .items
         .iter()
         .map(|i| {
-            let mut lines = vec![Spans::from(*i)];
+            let mut lines = vec![Spans::from(i)];
             ListItem::new(lines) //.style(Style::default().fg(Color::Black).bg(Color::White))
         })
         .collect();
