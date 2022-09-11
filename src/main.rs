@@ -77,6 +77,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+enum InputMode {
+    Normal,
+    Editing,
+}
+
+enum InputSelected {
+    SourceName,
+    SourceURL,
+}
+
 struct StatefulList<T> {
     state: ListState,
     items: Vec<T>,
@@ -154,6 +164,10 @@ impl<'a> AppState<'a> {
 }
 
 struct App<'a> {
+    inputURL: String,
+    inputSourceName: String,
+    input_mode: InputMode,
+    input_selected: InputSelected,
     state: &'a mut AppState<'a>,
     sources: StatefulList<news::Source>,
     articles: StatefulList<news::Article>,
@@ -174,6 +188,10 @@ impl<'a> App<'a> {
             sources.push(source.clone());
         }
         App {
+            inputURL: String::new(),
+            inputSourceName: String::new(),
+            input_mode: InputMode::Normal,
+            input_selected: InputSelected::SourceName,
             state: state,
             scroll: 0,
             last_action: 0,
@@ -200,6 +218,13 @@ impl<'a> App<'a> {
         self.state.set_sources(sources);
         self.sources = StatefulList::with_items(self.state.sources.clone());
         // self.sources.state.select(Some(1));
+    }
+
+    fn add_source(&mut self, input: String) {
+        let mut sources = self.state.sources.clone();
+        sources.push(news::Source{ name: input });
+        self.state.set_sources(sources);
+        self.sources = StatefulList::with_items(self.state.sources.clone());
     }
 
     fn on_tick(&mut self) {
@@ -235,46 +260,79 @@ fn run_app<B: Backend>(
             .unwrap_or_else(|| Duration::from_secs(0));
 
         if let Event::Key(key) = event::read()? {
-            match key.code {
-                KeyCode::Char('q') => return Ok(()),
-                KeyCode::Char('a') => {
-                    app.update_articles();
-                },
-                KeyCode::Char('s') => {
-                    app.update_sources();
-                },
-                // KeyCode::Left => app.items.unselect(),
-                KeyCode::Char('p') => app.show_popup = !app.show_popup,
-                KeyCode::Down | KeyCode::Char('j') => {
-                    match app.selected {
-                        0 => app.sources.next(),
-                        1 => {
-                            app.scroll = 0;
-                            app.articles.next();
-                        },
-                        _ => {
-                            if app.selected == 2 {
-                                app.last_action = 1;
-                            }
-                        },
-                    }
-                },
-                KeyCode::Up | KeyCode::Char('k') => {
-                    match app.selected {
-                        0 => app.sources.previous(),
-                        1 => {
-                            app.scroll = 0;
-                            app.articles.previous();
+            match app.input_mode {
+                InputMode::Normal => match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Char('a') => {
+                        app.update_articles();
+                    },
+                    KeyCode::Char('p') => {
+                        app.inputURL = "".to_string();
+                        app.inputSourceName = "".to_string();
+                        app.input_mode = InputMode::Editing;
+                        app.show_popup = !app.show_popup;
+                    },
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        match app.selected {
+                            0 => app.sources.next(),
+                            1 => {
+                                app.scroll = 0;
+                                app.articles.next();
+                            },
+                            _ => {
+                                if app.selected == 2 {
+                                    app.last_action = 1;
+                                }
+                            },
                         }
-                        _ => {
-                            if app.selected == 2 {
-                                app.last_action = 2;
+                    },
+                    KeyCode::Up | KeyCode::Char('k') => {
+                        match app.selected {
+                            0 => app.sources.previous(),
+                            1 => {
+                                app.scroll = 0;
+                                app.articles.previous();
                             }
-                        },
-                    }
+                            _ => {
+                                if app.selected == 2 {
+                                    app.last_action = 2;
+                                }
+                            },
+                        }
+                    },
+                    KeyCode::Tab => app.next_block(),
+                    _ => {}
                 },
-                KeyCode::Tab => app.next_block(),
-                _ => {}
+                InputMode::Editing => match key.code {
+                    KeyCode::Enter => {
+                        app.add_source(app.inputSourceName.clone());
+                        app.input_mode = InputMode::Normal;
+                        app.show_popup = !app.show_popup;
+                    }
+                    KeyCode::Tab => {
+                        match app.input_selected {
+                            InputSelected::SourceName => app.input_selected = InputSelected::SourceURL,
+                            InputSelected::SourceURL => app.input_selected = InputSelected::SourceName,
+                        }
+                    }
+                    KeyCode::Char(c) => {
+                        match app.input_selected {
+                            InputSelected::SourceName => app.inputSourceName.push(c),
+                            InputSelected::SourceURL => app.inputURL.push(c),
+                        }
+                    }
+                    KeyCode::Backspace => {
+                        match app.input_selected {
+                            InputSelected::SourceName => { app.inputSourceName.pop(); },
+                            InputSelected::SourceURL => { app.inputURL.pop(); },
+                        }
+                    }
+                    KeyCode::Esc => {
+                        app.input_mode = InputMode::Normal;
+                        app.show_popup = !app.show_popup;
+                    }
+                    _ => {}
+                }
             }
         }
 
@@ -456,10 +514,35 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     }
 
     if app.show_popup {
-        let block = Block::default().title("Popup").borders(Borders::ALL);
-        let area = centered_rect(60, 20, size);
+        let block = Block::default().title("Add source").borders(Borders::ALL);
+        let area = centered_rect(60, 17, size);
+        let block_area = block.inner(area);
         f.render_widget(Clear, area); //this clears out the background
         f.render_widget(block, area);
+
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(50),
+                Constraint::Percentage(50),
+            ].as_ref())
+        .split(block_area);
+
+        let inputSourceName = Paragraph::new(app.inputSourceName.as_ref())
+            .style(match app.input_selected {
+                InputSelected::SourceName => Style::default().fg(Color::Yellow),
+                _ => Style::default(),
+            })
+            .block(Block::default().borders(Borders::ALL).title("Source Name"));
+        f.render_widget(inputSourceName, chunks[0]);
+
+        let inputURL = Paragraph::new(app.inputURL.as_ref())
+            .style(match app.input_selected {
+                InputSelected::SourceURL => Style::default().fg(Color::Yellow),
+                _ => Style::default(),
+            })
+            .block(Block::default().borders(Borders::ALL).title("URL"));
+        f.render_widget(inputURL, chunks[1]);
     }
 }
 
