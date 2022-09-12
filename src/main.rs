@@ -15,7 +15,7 @@ use tui::{
     backend::{Backend, CrosstermBackend},
     style::{Color,Style,Modifier},
     text::{Span, Spans},
-    layout::{Alignment,Constraint, Direction, Layout, Rect, Corner},
+    layout::{Alignment,Constraint, Direction, Layout, Rect},
     widgets::{Block, Borders, BorderType, Clear, ListState, ListItem, List, Paragraph, Wrap},
     Frame, Terminal,
 };
@@ -23,21 +23,63 @@ use sqlx::sqlite::SqlitePool;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let pool = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
+    let mut conn = pool.acquire().await?;
+
+    sqlx::migrate!("db/migrations")
+        .run(&pool)
+        .await?;
+
+    // // Insert the task, then obtain the ID of this row
+    // let id = sqlx::query_unchecked!(
+    //     r#"
+    //     BEGIN;
+    //     CREATE TABLE sources (
+    //         id INT,
+    //         name VARCHAR,
+    //         url VARCHAR
+    //     );
+    //
+    //     CREATE TABLE articles (
+    //         id INT,
+    //         title VARCHAR,
+    //         url VARCHAR
+    //     );
+    //
+    //     CREATE TABLE source_articles (
+    //         source_id INT,
+    //         article_id INT
+    //     );
+    //
+    //     CREATE UNIQUE INDEX unique_article_url_idx ON articles(url);
+    //     CREATE UNIQUE INDEX unique_source_url_idx ON sources(url);
+    //     CREATE UNIQUE INDEX unique_source_name_idx ON sources(name);
+    //     CREATE UNIQUE INDEX unique_source_article_idx ON source_articles(source_id, article_id);
+    //
+    //     COMMIT;
+    //     "#,
+    // )
+    // .execute(&mut conn);
+    // .await?;
+
+    // println!("foo 2...\n");
+
     // let pool = SqlitePool::connect(&env::var("DATABASE_URL")?).await?;
     // let mut conn = pool.acquire().await?;
     //
-    // // Insert the task, then obtain the ID of this row
-    // let id = sqlx::query!(
+    // let id = sqlx::query_unchecked!(
     //     r#"
-    //     CREATE TABLE IF NOT EXISTS sources (
-    //         id INT,
-    //         name VARCHAR
-    //     );
+    //     CREATE UNIQUE INDEX unique_article_url_idx ON articles(url);
+    //     CREATE UNIQUE INDEX unique_source_url_idx ON sources(url);
+    //     CREATE UNIQUE INDEX unique_source_name_idx ON sources(name);
+    //     CREATE UNIQUE INDEX unique_source_article_idx ON source_articles(source_id, article_id);
     //     "#,
     // )
     // .execute(&mut conn)
     // .await?;
-    //
+
+    // println!("foo 3...\n");
+
     // let resp = reqwest::get("https://blog.cleancoder.com/atom.xml")
     //     .await?;
     // let body = resp.text().await?;
@@ -48,13 +90,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("-----------------------");
     // let articles = articles.iter().map(|a| a).collect();
 
+    // let sources = sqlx::query!(
+    //     "select * from sources"
+    // )
+    // .fetch_one(&mut conn)
+    // .await?;
+
+    // let articles = sqlx::query!(
+    //     "select * from articles"
+    // )
+    // .fetch_all(&mut conn)
+    // .await?;
+
+    // println!("ARTICLES: {:?}", articles);
+    // println!("FOUND SOURCES: {:?}", sources);
+
     // setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let mut state = AppState::new();
+    let mut state = AppState::new(pool).await?;
     let app = App::new(&mut state);
     let tick_rate = Duration::from_millis(50);
 
@@ -134,24 +191,36 @@ impl<T> StatefulList<T> {
 }
 
 struct AppState<'a> {
+    pool: sqlx::sqlite::SqlitePool,
     sources: Vec<news::Source>,
     articles: Vec<news::Article>,
     _phantom_data: std::marker::PhantomData<&'a ()>, // TODO: remove this
 }
 
 impl<'a> AppState<'a> {
-    fn new() -> AppState<'a> {
-        let source_1 = news::Source{ name: "foo 1".to_string() };
-        let source_2 = news::Source{ name: "foo 2".to_string() };
-        let source_3 = news::Source{ name: "foo 3".to_string() };
-        let sources = vec![source_1, source_2, source_3];
+    async fn new(pool: sqlx::sqlite::SqlitePool) -> Result<AppState<'a>, Box<dyn Error>> {
+        let mut conn = pool.acquire().await?;
+        let found_sources = sqlx::query!(
+            "select * from sources"
+        )
+        .fetch_all(&mut conn)
+        .await?;
+
+        let mut sources = vec![];
+        for s in found_sources.iter() {
+            sources.push(news::Source{
+                name: s.name.clone().unwrap_or("foo".to_string()),
+            });
+        }
+
         let contents = fs::read_to_string("example_rss.xml").expect("Should have been able to read the file");
         let articles = news::parse_rss(contents.as_ref()).unwrap_or_default();
-        AppState {
+        Ok(AppState {
+            pool,
             sources,
             articles,
             _phantom_data: std::marker::PhantomData,
-        }
+        })
     }
 
     fn set_articles(&mut self, articles: Vec<news::Article>) {
