@@ -27,12 +27,14 @@ struct Attribute {
 #[derive(Clone)]
 pub struct Source {
     pub name: String,
+    pub url: String,
 }
 
 impl Source {
     pub fn new() -> Self {
         Source {
             name: "".to_string(),
+            url: "".to_string(),
         }
     }
 }

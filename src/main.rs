@@ -116,7 +116,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let tick_rate = Duration::from_millis(50);
 
     // create app and run it
-    let res = run_app(&mut terminal, app, tick_rate);
+    let res = run_app(&mut terminal, app, tick_rate).await?;
 
     // restore terminal
     disable_raw_mode()?;
@@ -127,9 +127,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )?;
     terminal.show_cursor()?;
 
-    if let Err(err) = res {
-        println!("{:?}", err)
-    }
+    // if let Err(err) = res {
+    //     println!("{:?}", err)
+    // }
 
     Ok(())
 }
@@ -210,6 +210,7 @@ impl<'a> AppState<'a> {
         for s in found_sources.iter() {
             sources.push(news::Source{
                 name: s.name.clone().unwrap_or("foo".to_string()),
+                url: s.url.clone().unwrap_or("foo".to_string()),
             });
         }
 
@@ -271,29 +272,43 @@ impl<'a> App<'a> {
         }
     }
 
-    fn update_articles(&mut self) {
-        let contents = fs::read_to_string("example_atom.xml").expect("Should have been able to read the file");
-        let articles = news::parse_atom(contents.as_ref()).unwrap_or_default();
-        self.state.set_articles(articles);
-        self.articles = StatefulList::with_items(self.state.articles.clone());
-    }
+    // fn update_articles(&mut self) {
+    //     let contents = fs::read_to_string("example_atom.xml").expect("Should have been able to read the file");
+    //     let articles = news::parse_atom(contents.as_ref()).unwrap_or_default();
+    //     self.state.set_articles(articles);
+    //     self.articles = StatefulList::with_items(self.state.articles.clone());
+    // }
 
-    fn update_sources(&mut self) {
-        let source_1 = news::Source{ name: "foo 1".to_string() };
-        let source_2 = news::Source{ name: "foo 2".to_string() };
-        let source_3 = news::Source{ name: "foo 3".to_string() };
-        let source_4 = news::Source{ name: "foo 4".to_string() };
-        let sources = vec![source_1, source_2, source_3, source_4];
-        self.state.set_sources(sources);
-        self.sources = StatefulList::with_items(self.state.sources.clone());
-        // self.sources.state.select(Some(1));
-    }
+    // fn update_sources(&mut self) {
+    //     let source_1 = news::Source{ name: "foo 1".to_string(), url: "bar 2".to_string() };
+    //     let source_2 = news::Source{ name: "foo 2".to_string(), url: "bar 2".to_string() };
+    //     let source_3 = news::Source{ name: "foo 3".to_string(), url: "bar 2".to_string() };
+    //     let source_4 = news::Source{ name: "foo 4".to_string(), url: "bar 2".to_string() };
+    //     let sources = vec![source_1, source_2, source_3, source_4];
+    //     self.state.set_sources(sources);
+    //     self.sources = StatefulList::with_items(self.state.sources.clone());
+    //     // self.sources.state.select(Some(1));
+    // }
 
-    fn add_source(&mut self, input: String) {
-        let mut sources = self.state.sources.clone();
-        sources.push(news::Source{ name: input });
-        self.state.set_sources(sources);
-        self.sources = StatefulList::with_items(self.state.sources.clone());
+    async fn add_source(&mut self, source_name: String, source_url: String) -> Result<(), Box<dyn Error>> {
+        let mut conn = self.state.pool.acquire().await?;
+        let id = sqlx::query!(
+            r#"
+            INSERT INTO sources (name, url)
+            VALUES (?1, ?2)
+            "#,
+            source_name, source_url,
+        )
+        .execute(&mut conn)
+        .await?
+        .last_insert_rowid();
+
+        // let mut sources = self.state.sources.clone();
+        // sources.push(news::Source{ name: source_name, url: source_url });
+        // self.state.set_sources(sources);
+        // self.sources = StatefulList::with_items(self.state.sources.clone());
+
+        Ok(())
     }
 
     fn on_tick(&mut self) {
@@ -314,11 +329,11 @@ impl<'a> App<'a> {
     }
 }
 
-fn run_app<B: Backend>(
+async fn run_app<B: Backend>(
     terminal: &mut Terminal<B>,
-    mut app: App,
+    mut app: App<'_>,
     tick_rate: Duration,
-) -> io::Result<()> {
+) -> Result<(), Box<dyn Error>> {
     let mut last_tick = Instant::now();
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
@@ -332,9 +347,9 @@ fn run_app<B: Backend>(
             match app.input_mode {
                 InputMode::Normal => match key.code {
                     KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Char('a') => {
-                        app.update_articles();
-                    },
+                    // KeyCode::Char('a') => {
+                    //     app.update_articles();
+                    // },
                     KeyCode::Char('p') => {
                         app.inputURL = "".to_string();
                         app.inputSourceName = "".to_string();
@@ -374,7 +389,8 @@ fn run_app<B: Backend>(
                 },
                 InputMode::Editing => match key.code {
                     KeyCode::Enter => {
-                        app.add_source(app.inputSourceName.clone());
+                        // TODO: handle add source and don't close the form in case of error
+                        app.add_source(app.inputSourceName.clone(), app.inputURL.clone()).await?;
                         app.input_mode = InputMode::Normal;
                         app.show_popup = !app.show_popup;
                     }
@@ -573,7 +589,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         Some(i) => {
             let paragraph = Paragraph::new(app.articles.items[i].content.clone())
                 // .style(Style::default().bg(Color::White).fg(Color::Black))
-                .block(create_block("Center, wrap"))
+                .block(create_block("Article"))
                 // .alignment(Alignment::Center)
                 .wrap(Wrap { trim: true })
                 .scroll((app.scroll, 0));
