@@ -144,6 +144,12 @@ enum InputSelected {
     SourceURL,
 }
 
+enum SelectedPane {
+    Sources,
+    Articles,
+    ArticleText,
+}
+
 struct StatefulList<T> {
     state: ListState,
     items: Vec<T>,
@@ -241,7 +247,7 @@ struct App<'a> {
     state: &'a mut AppState<'a>,
     sources: StatefulList<news::Source>,
     articles: StatefulList<news::Article>,
-    selected: i8,
+    selected: SelectedPane,
     last_action: i8,
     scroll: u16,
     show_popup: bool,
@@ -265,7 +271,7 @@ impl<'a> App<'a> {
             state: state,
             scroll: 0,
             last_action: 0,
-            selected: 0,
+            selected: SelectedPane::Sources,
             show_popup: false,
             sources: StatefulList::with_items(sources),
             articles: StatefulList::with_items(articles),
@@ -303,10 +309,10 @@ impl<'a> App<'a> {
         .await?
         .last_insert_rowid();
 
-        // let mut sources = self.state.sources.clone();
-        // sources.push(news::Source{ name: source_name, url: source_url });
-        // self.state.set_sources(sources);
-        // self.sources = StatefulList::with_items(self.state.sources.clone());
+        let mut sources = self.state.sources.clone();
+        sources.push(news::Source{ name: source_name, url: source_url });
+        self.state.set_sources(sources);
+        self.sources = StatefulList::with_items(self.state.sources.clone());
 
         Ok(())
     }
@@ -323,8 +329,9 @@ impl<'a> App<'a> {
 
     fn next_block(&mut self) {
         match self.selected {
-            2 => self.selected = 0,
-            _ => self.selected += 1,
+            SelectedPane::Sources => self.selected = SelectedPane::Articles,
+            SelectedPane::Articles => self.selected = SelectedPane::ArticleText,
+            SelectedPane::ArticleText => self.selected = SelectedPane::Sources,
         }
     }
 }
@@ -350,36 +357,45 @@ async fn run_app<B: Backend>(
                     // KeyCode::Char('a') => {
                     //     app.update_articles();
                     // },
+                    KeyCode::Char('d') => {
+                        match app.selected {
+                            SelectedPane::Sources  => println!("DOWNLOAD ARTICLES"),
+                            _ => {},
+                        }
+                    },
                     KeyCode::Char('p') => {
                         app.inputURL = "".to_string();
                         app.inputSourceName = "".to_string();
                         app.input_mode = InputMode::Editing;
+                        app.input_selected = InputSelected::SourceName;
                         app.show_popup = !app.show_popup;
                     },
                     KeyCode::Down | KeyCode::Char('j') => {
                         match app.selected {
-                            0 => app.sources.next(),
-                            1 => {
+                            SelectedPane::Sources => app.sources.next(),
+                            SelectedPane::Articles => {
                                 app.scroll = 0;
                                 app.articles.next();
                             },
                             _ => {
-                                if app.selected == 2 {
-                                    app.last_action = 1;
+                                match app.selected {
+                                    SelectedPane::ArticleText => app.last_action = 1,
+                                    _ => {}
                                 }
                             },
                         }
                     },
                     KeyCode::Up | KeyCode::Char('k') => {
                         match app.selected {
-                            0 => app.sources.previous(),
-                            1 => {
+                            SelectedPane::Sources => app.sources.previous(),
+                            SelectedPane::Articles => {
                                 app.scroll = 0;
                                 app.articles.previous();
                             }
                             _ => {
-                                if app.selected == 2 {
-                                    app.last_action = 2;
+                                match app.selected {
+                                    SelectedPane::ArticleText => app.last_action = 2,
+                                    _ => {},
                                 }
                             },
                         }
@@ -390,7 +406,17 @@ async fn run_app<B: Backend>(
                 InputMode::Editing => match key.code {
                     KeyCode::Enter => {
                         // TODO: handle add source and don't close the form in case of error
-                        app.add_source(app.inputSourceName.clone(), app.inputURL.clone()).await?;
+                        match app.add_source(app.inputSourceName.clone(), app.inputURL.clone()).await {
+                            Ok(x) => {
+                                // println!("X: {:?}", x);
+                                // ..
+                            },
+                            Err(err) => {
+                                // TODO: handle error - display error message
+                                continue;
+                            }
+                        }
+                        // app.add_source(app.inputSourceName.clone(), app.inputURL.clone()).await?;
                         app.input_mode = InputMode::Normal;
                         app.show_popup = !app.show_popup;
                     }
@@ -421,11 +447,14 @@ async fn run_app<B: Backend>(
             }
         }
 
-        if app.selected == 2 {
-            if last_tick.elapsed() >= tick_rate {
-                app.on_tick();
-                last_tick = Instant::now();
-            }
+        match app.selected  {
+            SelectedPane::ArticleText => {
+                if last_tick.elapsed() >= tick_rate {
+                    app.on_tick();
+                    last_tick = Instant::now();
+                }
+            },
+            _ => {},
         }
     }
 }
@@ -472,10 +501,10 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .title("sources")
         .title_alignment(Alignment::Center)
         .border_type(BorderType::Rounded);
-    let sources_block = if app.selected == 0 {
-        sources_block.border_style(Style::default().fg(Color::LightGreen))
-    } else {
-        sources_block
+
+    let sources_block = match app.selected {
+        SelectedPane::Sources => sources_block.border_style(Style::default().fg(Color::LightGreen)),
+        _ => sources_block
     };
     f.render_widget(sources_block, chunks[0]);
 
@@ -492,10 +521,9 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .title("articles list")
         .title_alignment(Alignment::Center)
         .border_type(BorderType::Rounded);
-    let block = if app.selected == 1 {
-        block.border_style(Style::default().fg(Color::LightGreen))
-    } else {
-        block
+    let block = match app.selected {
+        SelectedPane::Articles => block.border_style(Style::default().fg(Color::LightGreen)),
+        _ => block
     };
     f.render_widget(block, chunks[0]);
     let bar = chunks[0];
@@ -505,10 +533,9 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .title("article")
         .title_alignment(Alignment::Center)
         .border_type(BorderType::Rounded);
-    let block = if app.selected == 2 {
-        block.border_style(Style::default().fg(Color::LightGreen))
-    } else {
-        block
+    let block = match app.selected {
+        SelectedPane::ArticleText => block.border_style(Style::default().fg(Color::LightGreen)),
+        _ => block
     };
     f.render_widget(block, chunks[1]);
     let baz = chunks[1];
@@ -524,16 +551,19 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         })
         .collect();
 
-    let style = if app.selected == 0 {
-        Style::default()
-            .fg(Color::Black)
-            .bg(Color::LightGreen)
-            .add_modifier(Modifier::BOLD)
-    } else {
-        Style::default()
-            .bg(Color::DarkGray)
-            .fg(Color::White)
-            .add_modifier(Modifier::BOLD)
+    let style = match app.selected {
+        SelectedPane::Sources => {
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::LightGreen)
+                .add_modifier(Modifier::BOLD)
+        },
+        _ => {
+            Style::default()
+                .bg(Color::DarkGray)
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD)
+        }
     };
     // Create a List from all list items and highlight the currently selected one
     let sources = List::new(sources)
@@ -555,16 +585,19 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         })
         .collect();
 
-    let style = if app.selected == 1 {
-        Style::default()
-            .fg(Color::Black)
-            .bg(Color::LightGreen)
-            .add_modifier(Modifier::BOLD)
-    } else {
-        Style::default()
-            .bg(Color::DarkGray)
-            .fg(Color::White)
-            .add_modifier(Modifier::BOLD)
+    let style = match app.selected {
+        SelectedPane::Articles => {
+            Style::default()
+                .fg(Color::Black)
+                .bg(Color::LightGreen)
+                .add_modifier(Modifier::BOLD)
+        },
+        _ => {
+            Style::default()
+                .bg(Color::DarkGray)
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD)
+        }
     };
     // Create a List from all list items and highlight the currently selected one
     let articles = List::new(articles)
