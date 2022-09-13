@@ -150,12 +150,13 @@ enum SelectedPane {
     ArticleText,
 }
 
+#[derive(Clone)]
 struct StatefulList<T> {
     state: ListState,
     items: Vec<T>,
 }
 
-impl<T> StatefulList<T> {
+impl<T: Clone> StatefulList<T> {
     fn with_items(items: Vec<T>) -> StatefulList<T> {
         StatefulList {
             state: ListState::default(),
@@ -189,6 +190,13 @@ impl<T> StatefulList<T> {
             None => 0,
         };
         self.state.select(Some(i));
+    }
+
+    fn selected(self) -> Option<T> {
+        return match self.state.selected() {
+            Some(i) => Some(self.items[i].clone()),
+            _ => None::<T>,
+        };
     }
 
     // fn unselect(&mut self) {
@@ -334,6 +342,25 @@ impl<'a> App<'a> {
             SelectedPane::ArticleText => self.selected = SelectedPane::Sources,
         }
     }
+
+    async fn save_articles(&self, articles: Vec<news::Article>) -> Result<(), Box<dyn Error>> {
+        let mut conn = self.state.pool.acquire().await?;
+        let mut query_builder: sqlx::QueryBuilder<sqlx::Sqlite> = sqlx::QueryBuilder::new(
+            "INSERT INTO articles(title, url) "
+        );
+
+        const BIND_LIMIT: usize = 65535;
+
+        query_builder.push_values(articles.into_iter().take(BIND_LIMIT / 4), |mut b, article| {
+            b.push_bind(article.title)
+             .push_bind(article.url);
+        });
+
+        let mut query = query_builder.build();
+        query.execute(&mut conn).await?;
+
+        Ok(())
+    }
 }
 
 async fn run_app<B: Backend>(
@@ -359,7 +386,17 @@ async fn run_app<B: Backend>(
                     // },
                     KeyCode::Char('d') => {
                         match app.selected {
-                            SelectedPane::Sources  => println!("DOWNLOAD ARTICLES"),
+                            SelectedPane::Sources  => {
+                                match app.sources.clone().selected() {
+                                    Some(source) => {
+                                        let resp = reqwest::get(source.url).await?;
+                                        let body = resp.text().await?;
+                                        let articles = news::parse_rss(body.clone().as_ref())?;
+                                        app.save_articles(articles).await?;
+                                    },
+                                    _ => {},
+                                }
+                            },
                             _ => {},
                         }
                     },
